@@ -1,4 +1,4 @@
-# .github/workflows/daily-reminder.yml
+# hey .github/workflows/daily-reminder.yml
 name: Daily Telegram Reminder
 
 on:
