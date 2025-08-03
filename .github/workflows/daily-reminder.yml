@@ -3,9 +3,12 @@ name: Daily Telegram Reminder
 
 on:
   schedule:
-    # Runs at 8:45 AM UTC (adjust timezone as needed)
-    - cron: '52 12 * * *'
+    # Runs at 8:45 AM Turkey time (5:45 AM UTC)
+    - cron: '0 * * * *'  # Every hour at minute 0
   workflow_dispatch: # Allows manual trigger for testing
+
+permissions:
+  contents: read
 
 jobs:
   send-reminder:
