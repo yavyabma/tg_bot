@@ -21,8 +21,8 @@ def send_telegram_message(bot_token, chat_id, message):
     
     payload = {
         'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'Markdown'
+        'text': message
+        # Removed parse_mode to avoid formatting issues
     }
     
     try:
@@ -35,30 +35,43 @@ def send_telegram_message(bot_token, chat_id, message):
         return False
 
 def main():
+    print("🚀 Starting Telegram reminder...")
+    
     # Get environment variables
     bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('TELEGRAM_CHAT_ID')
     
+    print(f"Bot token present: {'Yes' if bot_token else 'No'}")
+    print(f"Chat ID present: {'Yes' if chat_id else 'No'}")
+    
     if not bot_token or not chat_id:
-        print("Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set")
+        print("❌ Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set")
         return
     
     # Read daily tasks
+    print("📖 Reading daily tasks...")
     tasks = read_daily_tasks()
+    print(f"Tasks loaded: {len(tasks)} characters")
     
-    # Format the message
+    # Format the message (simplified to avoid Markdown issues)
     today = datetime.now().strftime("%A, %B %d, %Y")
-    message = f"""🌅 *Good Morning!*
+    message = f"""🌅 Good Morning!
     
-📅 *{today}*
+📅 {today}
 
-📝 *Today's Tasks:*
+📝 Today's Tasks:
 {tasks}
 
 Have a productive day! ✨"""
     
+    print("📤 Sending message...")
     # Send the message
-    send_telegram_message(bot_token, chat_id, message)
+    success = send_telegram_message(bot_token, chat_id, message)
+    
+    if success:
+        print("✅ Reminder sent successfully!")
+    else:
+        print("❌ Failed to send reminder!")
 
 if __name__ == "__main__":
     main()
