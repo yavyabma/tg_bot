@@ -1,0 +1,32 @@
+# .github/workflows/daily-reminder.yml
+name: Daily Telegram Reminder
+
+on:
+  schedule:
+    # Runs at 8:45 AM UTC (adjust timezone as needed)
+    - cron: '21 12 * * *'
+  workflow_dispatch: # Allows manual trigger for testing
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      run: |
+        pip install requests
+    
+    - name: Send Telegram message
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python send_reminder.py
