@@ -1,28 +1,44 @@
-# send_reminder.py
 import requests
 import os
 from datetime import datetime
 
-def read_daily_tasks():
-    """Read tasks from a text file"""
-    try:
-        with open('daily_tasks.txt', 'r', encoding='utf-8') as file:
-            tasks = file.read().strip()
-            if tasks:
-                return tasks
-            else:
-                return "No tasks scheduled for today! 🎉"
-    except FileNotFoundError:
-        return "Task file not found. Please create 'daily_tasks.txt' with your daily tasks."
+def generate_daily_message():
+    """Generates the daily reminder message based on the day of the week."""
+    
+    # Get the current day of the week (Monday is 0, Sunday is 6)
+    today = datetime.now().weekday()
+    
+    # Define a dictionary for workout routines
+    # Tuesday (1), Thursday (3), and Saturday (5) are workout days
+    workout_routines = {
+        1: "Bodybuilding workout: Chest - Triceps",
+        3: "Bodybuilding workout: Back, Trapeze, Neck",
+        5: "Bodybuilding workout: Shoulder - Biceps"
+    }
+
+    # Start with the greeting and supplements, which are taken every day
+    message_lines = [
+        "Hey there!",
+        "Here are your reminders for today:",
+        "- Collagen shots (10g) before your meal.",
+        "- Tongkat Ali supplement pill after your meal."
+    ]
+
+    # Add the workout routine if today is a workout day
+    if today in workout_routines:
+        message_lines.append(f"- {workout_routines[today]}")
+
+    # Format the final message string
+    message = "\n".join(message_lines)
+    return message
 
 def send_telegram_message(bot_token, chat_id, message):
-    """Send message via Telegram bot"""
+    """Sends a message via the Telegram bot."""
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     
     payload = {
         'chat_id': chat_id,
         'text': message
-        # Removed parse_mode to avoid formatting issues
     }
     
     try:
@@ -48,21 +64,9 @@ def main():
         print("❌ Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set")
         return
     
-    # Read daily tasks
-    print("📖 Reading daily tasks...")
-    tasks = read_daily_tasks()
-    print(f"Tasks loaded: {len(tasks)} characters")
-    
-    # Format the message (simplified to avoid Markdown issues)
-    today = datetime.now().strftime("%A, %B %d, %Y")
-    message = f"""🌅 Good Morning!
-    
-📅 {today}
-
-📝 Today's Tasks:
-{tasks}
-
-Have a productive day! ✨"""
+    # Generate the daily reminder message
+    print("📝 Generating daily message...")
+    message = generate_daily_message()
     
     print("📤 Sending message...")
     # Send the message
