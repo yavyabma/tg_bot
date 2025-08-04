@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 def generate_daily_message():
-    """Generates the daily reminder message based on the day of the week."""
+    """Generates the daily reminder message based on the day of the week, in the style of Paul Atreides."""
     
     # Get the current day of the week (Monday is 0, Sunday is 6)
     today = datetime.now().weekday()
@@ -11,18 +11,20 @@ def generate_daily_message():
     # Define a dictionary for workout routines
     # Tuesday (1), Thursday (3), and Saturday (5) are workout days
     workout_routines = {
-        1: "Bodybuilding workout: Chest - Triceps",
-        3: "Bodybuilding workout: Back, Trapeze, Neck",
-        5: "Bodybuilding workout: Shoulder - Biceps"
+        1: "The Bene Gesserit's test: Chest - Triceps.",
+        3: "Forge the warrior: Back, Trapeze, Neck.",
+        5: "Sharpen the blade: Shoulder - Biceps."
     }
 
-    # Start with the greeting and supplements, which are taken every day
+    # Start with the greeting and daily supplements, which are taken every day
     message_lines = [
-        "Hey there!",
-        "Here are your reminders for today:",
-        "- Collagen shots (10g) before your meal.",
-        "- Tongkat Ali supplement pill after your meal."
+        "Heed these words.",
+        "The path of the day is laid before you. Attend to these directives:"
     ]
+
+    # Add the daily supplements
+    message_lines.append("- Consume the water of life; take the collagen shots (10g) before your meal.")
+    message_lines.append("- The desert's resolve strengthens with the Tongkat Ali supplement pill after your meal.")
 
     # Add the workout routine if today is a workout day
     if today in workout_routines:
