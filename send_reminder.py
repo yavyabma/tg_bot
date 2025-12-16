@@ -2,54 +2,54 @@ import requests
 import os
 from datetime import date
 
-# --- KONFİGÜRASYON (Döngü Ayarları) ---
+# --- CONFIGURATION (Cycle Settings) ---
 ON_DAYS = 5
 OFF_DAYS = 2
 WEEKLY_CYCLE = ON_DAYS + OFF_DAYS
-ACTIVE_DAYS = 56      # 8 hafta
-LONG_BREAK_DAYS = 14  # 2 hafta
-FULL_CYCLE = ACTIVE_DAYS + LONG_BREAK_DAYS  # 70 gün
+ACTIVE_DAYS = 56      # 8 weeks
+LONG_BREAK_DAYS = 14  # 2 weeks
+FULL_CYCLE = ACTIVE_DAYS + LONG_BREAK_DAYS  # 70 days
 
 def generate_daily_message():
-    """Tongkat Ali döngüsüne göre günlük mesajı oluşturur."""
+    """Generates the daily message based on the Tongkat Ali cycle."""
     
-    # 1. Başlangıç Tarihini Al (Environment Variable veya Sabit Tarih)
-    # GitHub Secrets'a TONGKAT_START_DATE eklemezsen buradaki tarihi baz alır.
+    # 1. Get Start Date (Environment Variable or Default)
+    # If TONGKAT_START_DATE is not set in GitHub Secrets, it uses the default below.
     start_date_str = os.getenv("TONGKAT_START_DATE", "2025-12-17")
     
     try:
         start_date = date.fromisoformat(start_date_str)
     except ValueError:
-        return "⚠️ HATA: Tarih formatı geçersiz (YYYY-MM-DD olmalı)."
+        return "⚠️ ERROR: Invalid date format (must be YYYY-MM-DD)."
 
     today = date.today()
     days_passed = (today - start_date).days
 
-    # Debug için log (GitHub Actions konsolunda görünür)
+    # Debug logs (Visible in GitHub Actions console)
     print(f"📅 Start Date: {start_date}")
     print(f"📅 Today: {today}")
     print(f"🔢 Days Passed: {days_passed}")
 
-    # Döngü henüz başlamadıysa
+    # If the cycle hasn't started yet
     if days_passed < 0:
-        return f"⏳ Döngü başlamadı. ({abs(days_passed)} gün kaldı)"
+        return f"⏳ Cycle hasn't started yet. ({abs(days_passed)} days left)"
 
     cycle_day = days_passed % FULL_CYCLE
     print(f"🔄 Cycle Day (0-69): {cycle_day}")
 
-    # 🔵 Long break (2 weeks)
+    # 🔵 Long break (2 weeks) - From day 56 to 69
     if cycle_day >= ACTIVE_DAYS:
         return "Let your body fully reset 🔵 (Long Break)"
     
     # 🟢 Weekly 5 ON / 2 OFF
     weekly_day = cycle_day % WEEKLY_CYCLE
     if weekly_day < ON_DAYS:
-        return "T Maxxing 🟢 (ON Day)"
+        return "T Maxxing 🟢"
     else:
-        return "Let your body rest 🟡 (OFF Day)"
+        return "Let your body rest"
 
 def send_telegram_message(bot_token, chat_id, message):
-    """Telegram mesajını gönderir."""
+    """Sends the message via Telegram API."""
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     
     payload = {
@@ -60,41 +60,40 @@ def send_telegram_message(bot_token, chat_id, message):
     try:
         response = requests.post(url, data=payload, timeout=10)
         response.raise_for_status()
-        print(f"📤 Mesaj API'ye iletildi. Response: {response.status_code}")
+        print(f"📤 Message sent to API. Response code: {response.status_code}")
         return True
     except requests.exceptions.RequestException as e:
-        print(f"❌ Mesaj gönderme hatası: {e}")
+        print(f"❌ Error sending message: {e}")
         return False
 
 def main():
-    print("🚀 Tongkat Ali Reminder başlatılıyor...")
+    print("🚀 Starting Tongkat Ali Reminder...")
     
-    # Environment değişkenlerini al
+    # Get environment variables
     bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('TELEGRAM_CHAT_ID')
     
-    # Güvenlik kontrolü (Loglarda token görünmez, sadece var/yok yazar)
-    print(f"Bot token mevcut: {'Evet' if bot_token else 'Hayır'}")
-    print(f"Chat ID mevcut: {'Evet' if chat_id else 'Hayır'}")
+    # Security check (Do not print the token, just check existence)
+    print(f"Bot token present: {'Yes' if bot_token else 'No'}")
+    print(f"Chat ID present: {'Yes' if chat_id else 'No'}")
     
     if not bot_token or not chat_id:
-        print("❌ HATA: TELEGRAM_BOT_TOKEN ve TELEGRAM_CHAT_ID ayarlanmalı!")
+        print("❌ ERROR: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set!")
         return
     
-    # Mesajı oluştur
-    print("📝 Günlük mesaj hesaplanıyor...")
+    # Generate the message
+    print("📝 Calculating daily message...")
     message = generate_daily_message()
-    print(f"💬 Gönderilecek Mesaj: {message}")
+    print(f"💬 Message to send: {message}")
     
-    # Gönder
+    # Send the message
     success = send_telegram_message(bot_token, chat_id, message)
     
     if success:
-        print("✅ İşlem başarıyla tamamlandı!")
+        print("✅ Process completed successfully!")
     else:
-        print("❌ İşlem başarısız oldu!")
-        # GitHub Actions'ın hatayı fark etmesi için exit code 1 verilebilir (opsiyonel)
-        # exit(1) 
+        print("❌ Process failed!")
+        # Optional: exit(1) to notify GitHub Actions of failure
 
 if __name__ == "__main__":
     main()
